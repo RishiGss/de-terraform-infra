@@ -1,6 +1,6 @@
 # Service Account for Terraform to provision resources in the dev project
 resource "google_service_account" "dev_terraform_service_account" {
-  account_id      = "dev-tf-provisioner-sa"
+  account_id      = var.dev_terraform_service_account_id
   display_name    = "Service Account for Terraform to provision resources in the dev project"
   description     = "This service account is used by Terraform to provision resources in the dev project."
   project         = var.dev_project

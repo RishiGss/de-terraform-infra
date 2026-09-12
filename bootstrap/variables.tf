@@ -19,6 +19,11 @@ variable "admin_email" {
   type        = string
 }
 
+variable "dev_terraform_service_account_id" {
+  description = "The name of the service account that Terraform will use to provision resources in the dev project"
+  type        = string
+}
+
 variable "dev_terraform_state_bucket_name" {
   description = "The name of the GCS bucket that acts as remote backend to store Terraform state for the dev project"
   type        = string
