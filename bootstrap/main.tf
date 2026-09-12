@@ -12,7 +12,9 @@ resource "google_project_iam_member" "dev_tf_sa_iam_member" {
 
   for_each = toset([
     "roles/storage.admin",
-    "roles/bigquery.admin"
+    "roles/bigquery.admin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/resourcemanager.projectIamAdmin"
   ])
 
   project = var.dev_project

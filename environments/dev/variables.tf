@@ -1,3 +1,8 @@
+variable "admin_email" {
+  description = "The email of the admin user"
+  type        = string
+}
+
 variable "dev_project" {
   description = "The Dev GCP project ID"
   type        = string
@@ -14,7 +19,12 @@ variable "dev_tf_service_account_id" {
   type        = string
 }
 
-variable "dev_tf_state_bucket_name" {
-  description = "The name of the GCS bucket that acts as remote backend to store Terraform state for the dev project"
+variable "dataproc_runtime_sa_id" {
+  description = "The ID of the service account that Dataproc will use at runtime"
   type        = string
+}
+
+variable "dataproc_runtime_sa_project_roles" {
+  description = "The list of project roles to be assigned to the Dataproc runtime service account"
+  type        = list(string)
 }
