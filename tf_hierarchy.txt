@@ -1,0 +1,39 @@
+infra/
+├── modules/
+│   ├── service_account/
+│   │   ├── main.tf          # google_service_account + iam_member resources
+│   │   ├── variables.tf     # account_id, roles list, project
+│   │   └── outputs.tf       # email, name (for downstream impersonation grants)
+│   ├── gcs_bucket/
+│   │   ├── main.tf          # bucket + lifecycle + versioning
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── bq_dataset/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── networking/          # created when W3 needs it — empty for now
+│   ├── dataproc/            # created when W3 needs it — empty for now
+│   └── pubsub/              # created when W9 needs it — empty for now
+│
+├── environments/
+│   ├── dev/
+│   │   ├── backend.tf       # GCS backend, dev state bucket + prefix
+│   │   ├── providers.tf     # provider block, impersonates tf-provisioner-sa
+│   │   ├── main.tf          # calls modules, wires them together
+│   │   ├── variables.tf
+│   │   ├── terraform.tfvars # project_id = learning-dataeng-dev, etc.
+│   │   └── outputs.tf
+│   │
+│   └── prod/
+│       ├── backend.tf       # separate state bucket + prefix — never shared with dev
+│       ├── providers.tf
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── terraform.tfvars # project_id = learning-dataeng-prd
+│       └── outputs.tf
+│
+└── bootstrap/
+    ├── main.tf              # the one-time chicken-and-egg resources:
+    │                        #   tf-provisioner-sa itself, the state buckets
+    └── README.md            # explains why this exists outside environments/
