@@ -118,6 +118,7 @@ resource "google_project_iam_member" "airflow_orch_sa_project_iam" {
   member  = google_service_account.airflow_orchestrator_sa.member
 }
 
+# assign bucket level roles to the Airflow orchestrator service account
 resource "google_storage_bucket_iam_member" "airflow_orch_sa_bucket_iam" {
   bucket = local.airflow_logs_bucket
   role   = "roles/storage.objectUser"
