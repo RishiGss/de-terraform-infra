@@ -11,6 +11,14 @@ locals {
   bucket_names = {
     for k, m in module.gcs_buckets : k => m.gcs_bucket_output.name # read attribute from child module output
   }
+
+  datalake_buckets = {
+    raw     = local.bucket_names["raw"]
+    curated = local.bucket_names["curated"]
+  }
+
+  airflow_logs_bucket = local.bucket_names["airflow-logs"]
+
 }
 
 # create GCS buckets
@@ -76,9 +84,9 @@ resource "google_project_iam_member" "dataproc_sa_project_iam" {
 
 # assign bucket level roles to the Dataproc runtime service account
 resource "google_storage_bucket_iam_member" "dataproc_sa_bucket_iam" {
-  for_each = local.bucket_names
+  for_each = local.datalake_buckets
 
-  bucket = each.value # read attribute from local.bucket_names
+  bucket = each.value # read attribute from local.datalake_buckets
   role   = "roles/storage.objectAdmin"
   member = google_service_account.dataproc_runtime_sa.member # implicit dependency
 }
@@ -108,6 +116,13 @@ resource "google_project_iam_member" "airflow_orch_sa_project_iam" {
   project = var.dev_project
   role    = "roles/dataproc.editor"
   member  = google_service_account.airflow_orchestrator_sa.member
+}
+
+# assign bucket level roles to the Airflow orchestrator service account
+resource "google_storage_bucket_iam_member" "airflow_orch_sa_bucket_iam" {
+  bucket = local.airflow_logs_bucket
+  role   = "roles/storage.objectUser"
+  member = google_service_account.airflow_orchestrator_sa.member
 }
 
 # grant the Airflow orchestrator service account the ability to act as the Dataproc runtime service account
