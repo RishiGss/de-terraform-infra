@@ -35,3 +35,12 @@ output "dataproc_runtime_sa_output" {
     member = google_service_account.dataproc_runtime_sa.member
   }
 }
+
+output "airflow_orchestrator_sa_output" {
+  value = {
+    id     = google_service_account.airflow_orchestrator_sa.id
+    name   = google_service_account.airflow_orchestrator_sa.name
+    email  = google_service_account.airflow_orchestrator_sa.email
+    member = google_service_account.airflow_orchestrator_sa.member
+  }
+}

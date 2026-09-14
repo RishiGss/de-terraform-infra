@@ -24,7 +24,7 @@ variable "dataproc_runtime_sa_id" {
   type        = string
 }
 
-variable "dataproc_runtime_sa_project_roles" {
-  description = "The list of project roles to be assigned to the Dataproc runtime service account"
-  type        = list(string)
+variable "airflow_orchestrator_sa_id" {
+  description = "The ID of the service account that Airflow Orchestrator will use to submit Dataproc jobs"
+  type        = string
 }

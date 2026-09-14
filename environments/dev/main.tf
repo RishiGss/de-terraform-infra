@@ -48,7 +48,9 @@ module "bq_datasets" {
 
 # resources
 
-# dataproc runtime service account and its IAM roles
+# --------------------------------------------------
+# Dataproc runtime service account and its IAM roles
+# --------------------------------------------------
 
 # create Dataproc runtime service account
 resource "google_service_account" "dataproc_runtime_sa" {
@@ -61,7 +63,11 @@ resource "google_service_account" "dataproc_runtime_sa" {
 
 # assign project level roles to the Dataproc runtime service account
 resource "google_project_iam_member" "dataproc_sa_project_iam" {
-  for_each = toset(var.dataproc_runtime_sa_project_roles)
+  for_each = toset([
+    "roles/dataproc.worker",
+    "roles/bigquery.dataEditor",
+    "roles/bigquery.jobUser"
+  ])
 
   project = var.dev_project
   role    = each.value
@@ -77,9 +83,43 @@ resource "google_storage_bucket_iam_member" "dataproc_sa_bucket_iam" {
   member = google_service_account.dataproc_runtime_sa.member # implicit dependency
 }
 
-# assign IAM roles to the Dataproc runtime service account
+# allow the admin user to impersonate the Dataproc runtime service account
 resource "google_service_account_iam_member" "dataproc_sa_iam" {
   service_account_id = google_service_account.dataproc_runtime_sa.name # implicit dependency
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "user:${var.admin_email}"
+}
+
+# --------------------------------------------------
+# Airflow Orchestrator SA and its IAM roles
+# --------------------------------------------------
+
+# create Airflow orchestrator service account
+resource "google_service_account" "airflow_orchestrator_sa" {
+  account_id      = var.airflow_orchestrator_sa_id
+  project         = var.dev_project
+  display_name    = "Service Account for Airflow Orchestrator — submits Dataproc batches (runs as dataproc-runtime-sa)"
+  description     = "Submits and manages Dataproc Serverless batches on behalf of Airflow. Does not execute workloads itself — holds serviceAccountUser on dataproc-runtime-sa"
+  deletion_policy = "PREVENT"
+}
+
+# assign project level roles to the Airflow orchestrator service account
+resource "google_project_iam_member" "airflow_orch_sa_project_iam" {
+  project = var.dev_project
+  role    = "roles/dataproc.editor"
+  member  = google_service_account.airflow_orchestrator_sa.member
+}
+
+# grant the Airflow orchestrator service account the ability to act as the Dataproc runtime service account
+resource "google_service_account_iam_member" "airflow_orch_sa_dataproc_runtime_iam" {
+  service_account_id = google_service_account.dataproc_runtime_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = google_service_account.airflow_orchestrator_sa.member
+}
+
+# allow the admin user to impersonate the Airflow orchestrator service account
+resource "google_service_account_iam_member" "airflow_orch_sa_iam" {
+  service_account_id = google_service_account.airflow_orchestrator_sa.name
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "user:${var.admin_email}"
 }
